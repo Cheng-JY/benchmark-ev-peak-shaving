@@ -21,22 +21,22 @@ class Wang():
         charging = np.zeros(len(ch_avail))
 
         for t in range(len(ch_avail)):
-            a[t] = np.min(SoC_max[t] - SoC[t], ch_avail[t])
-            b[t] = np.min(SoC[t] - SoC_min[t], ch_avail[t])
+            a[t] = np.minimum(SoC_max[t] - SoC[t], ch_avail[t])
+            b[t] = np.minimum(SoC[t] - SoC_min[t], ch_avail[t])
             if target_load_ev[t] == 0:
                 charging[t] = 0
             elif target_load_ev[t] > 0:
                 if np.abs(target_load_ev[t]) < b[t]:
-                    charging[t] = -target_load_ev[t]
+                    charging[t] = -np.minimum(np.abs(target_load_ev[t]), ch_avail[t])
                 else:
-                    charging[t] = -b[t]
+                    charging[t] = -np.minimum(b[t], ch_avail[t])
             else:
                 # target_load_ev[t] < 0
                 if np.abs(target_load_ev[t]) < a[t]:
-                    charging[t] = np.abs(target_load_ev[t])
+                    charging[t] = np.minimum(np.abs(target_load_ev[t]), ch_avail[t])
                 else:
-                    charging[t] = a[t]
-            SoC[t+1] = np.max(SoC[t] + charging[t] - consumption[t], 0)
+                    charging[t] = np.minimum(a[t], ch_avail[t])
+            SoC[t+1] = np.maximum(SoC[t] + charging[t] - consumption[t], 0)
         
         return SoC, charging
 
