@@ -21,7 +21,7 @@ class Arnaudo():
         SoC[0] = SoC_init
         charging = np.zeros(len(ch_avail))
 
-        for t in range(0, len(ch_avail)):
+        for t in range(len(ch_avail)):
             if SoC[t] < self.start_charging * battery_capacity:
                 charging[t] = np.min(ch_avail[t], battery_capacity - SoC[t])
             elif SoC[t] > self.stop_charging * battery_capacity:
@@ -30,6 +30,7 @@ class Arnaudo():
                 charging[t] = -np.min(ch_avail[t], SoC[t] - self.start_discharging * battery_capacity)
             elif self.start_charging * battery_capacity <= SoC[t] <= self.start_discharging_charging * battery_capacity:
                 charging[t] = 0
-            SoC[t] = np.max(SoC[t-1] + charging[t] - consumption[t], 0)
+            SoC[t+1] = np.max(SoC[t] + charging[t] - consumption[t], 0)
+        
         return SoC, charging
 
