@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-import utils.calculate_soc as cal_soc
+import src.utils._calculate_soc as cal_soc
 
 class Uncontrolled():
     def __init__(self):
-        pass
+        super.__init__(self)
 
     def get_SoC(self, 
                 ch_avail: pd.Series, 
