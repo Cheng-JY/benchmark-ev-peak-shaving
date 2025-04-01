@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import src.utils._calculate_soc as cal_soc
+import src.utils._calculation as cal_soc
 
 class Uncontrolled():
     def __init__(self):

@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.utils._calculate_soc import calculate_SoC
+from src.utils._calculation import calculate_SoC
 
 class Wang():
     def __init__(self):
