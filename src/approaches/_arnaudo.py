@@ -17,7 +17,7 @@ class Arnaudo():
         if SoC > 80%, start discharging, until 80% stop
         :return:
         """
-        SoC =  SoC = np.zeros(len(ch_avail))
+        SoC = np.zeros(len(ch_avail))
         SoC[0] = SoC_init
         charging = np.zeros(len(ch_avail))
 

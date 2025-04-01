@@ -4,7 +4,7 @@ from src.utils._calculate_soc import calculate_SoC
 
 class Wang():
     def __init__(self):
-        super.__init__(self)
+        pass
 
     def get_SoC_charging(
             self,
@@ -26,18 +26,17 @@ class Wang():
             if target_load_ev[t] == 0:
                 charging[t] = 0
             elif target_load_ev[t] > 0:
-                if np.abs(target_load_ev[t]) < b[t]:
-                    charging[t] = -np.minimum(np.abs(target_load_ev[t]), ch_avail[t])
-                else:
-                    charging[t] = -np.minimum(b[t], ch_avail[t])
+                charging[t] = (
+                    -np.minimum(np.abs(target_load_ev[t]), ch_avail[t])
+                    if np.abs(target_load_ev[t]) < b[t]
+                    else -np.minimum(b[t], ch_avail[t])
+                )
+            elif np.abs(target_load_ev[t]) < a[t]:
+                charging[t] = np.minimum(np.abs(target_load_ev[t]), ch_avail[t])
             else:
-                # target_load_ev[t] < 0
-                if np.abs(target_load_ev[t]) < a[t]:
-                    charging[t] = np.minimum(np.abs(target_load_ev[t]), ch_avail[t])
-                else:
-                    charging[t] = np.minimum(a[t], ch_avail[t])
+                charging[t] = np.minimum(a[t], ch_avail[t])
             SoC[t+1] = np.maximum(SoC[t] + charging[t] - consumption[t], 0)
-        
+
         return SoC, charging
 
             
