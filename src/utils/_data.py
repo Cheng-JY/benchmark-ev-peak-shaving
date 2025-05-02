@@ -67,7 +67,9 @@ def ch_profile_filename(
     return f"{profile_type}_{country}_{date_}_{weather_year}_cal{calendar_year}{mob_group_str}"
 
 _ecv2g_path = os.path.dirname(os.path.realpath(__file__))
-ecv2g_path = os.path.abspath(os.path.join(_ecv2g_path,"..", "..", "..", ".."))
+print(_ecv2g_path)
+ecv2g_path = os.path.abspath(os.path.join(_ecv2g_path,"..", ".."))
+print(ecv2g_path)
 
 def data_path(data_folder_name:str|None=None):
     data_folder = os.path.join(ecv2g_path, 'data')

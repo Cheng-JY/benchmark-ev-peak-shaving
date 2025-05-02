@@ -2,6 +2,15 @@ import pandas as pd
 import numpy as np
 
 class Arnaudo():
+    """
+    This class implements the Arnaudo et al. (2020) approach for V2G charging and discharging. This approach 
+    doesn't coordinate with the grid, but rather uses a fixed schedule for charging and discharging based on the
+    state of charge (SoC) of the battery.
+
+    Arnaudo, M., Topel, M., & Laumert, B. (2020). Vehicle-To-Grid for Peak Shaving to Unlock the Integration of 
+    Distributed Heat Pumps in a Swedish Neighborhood. Energies, 13(7), 1705. https://doi.org/10.3390/en13071705 
+    """
+
     def __init__(self, start_charging, stop_charging, start_discharging):
         self.start_charging = start_charging
         self.stop_charging = stop_charging

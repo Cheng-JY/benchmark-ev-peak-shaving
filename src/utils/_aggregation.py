@@ -4,11 +4,8 @@ import pandas as pd
 import os
 from copy import deepcopy
 import logging
-import pandas as pd
-import numpy as np
 from _calculation import * 
-from _data import *
-from src.utils._data import data_path
+from _data import data_path
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -160,6 +157,26 @@ def aggregate_household(
         data_path(data_folder_name), profile_output + '.parquet'))
     
     logger.info(f'aggregated profiles saved to {profile_output}.csv in {data_folder_name}')
+
+def aggregate_profile(
+        charging_profiles:pd.DataFrame,
+        profile_output:str="ch_profiles_agg",
+        hourly_profiles:bool=True,      
+):  
+    profile_agg = charging_profiles.T.groupby(level=1).sum().T
+    profile_agg = profile_agg / 1000 # convert to MW
+
+    if hourly_profiles:
+        profile_agg = profile_agg.resample('h').agg({
+                'ch_avail': 'mean', 'ch_avail_plug2': 'mean', 
+                'SOCmax': 'first', 'SOCmin': 'first', 'SOCmax_plug2': 'first', 'SOCmin_plug2': 'first',
+                'distance': 'sum','ch_direct': 'sum', 'ch_refuel': 'sum', 'ch_travel': 'sum', 
+                'consumption': 'sum', 'dem_temp': 'sum', 'max_el_distance': 'sum',
+                })
+            
+    profile_agg.to_csv(profile_output + '_' + '.csv', sep=";")
+    profile_agg.to_parquet(profile_output + '_' + '.parquet')
+    logger.info(f'aggregated profiles saved to {profile_output}.csv')
 
 
 if __name__ == "__main__":
