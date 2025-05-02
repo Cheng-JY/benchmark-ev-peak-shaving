@@ -27,7 +27,7 @@ def plot_avail_charging_boxplot(
     plt.figure()
 
     plt.boxplot(results_dict.values())
-    plt.xticks([i for i in range(1, 12)], list(results_dict.keys()))
+    plt.xticks(list(range(1, 12)), list(results_dict.keys()))
     plt.xlabel("ch_refuel_threshold")
     plt.ylabel("Plug in duration (h/month)")
     plt.title(f"Plug in duration vs ch_refuel_threshold home charing ({n_ev} evs)")

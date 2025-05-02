@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 class Proposed():
-    def __init__(self, THESHOLD: float=self.THRESHOLD):
+    def __init__(self, THESHOLD: float=1e-7):
         self.THESHOLD = THESHOLD
     
     def get_SoC_charging_smart_charging(

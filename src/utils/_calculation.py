@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from ._data import load_csv, data_path, get_household_load
+import re
 
 def calculate_SoC(SoC_prev, charging, consumption):
     return np.max(SoC_prev + charging - consumption, 0)
@@ -29,17 +30,16 @@ def get_influence_length(
     start = None
 
     for i in range(len(status_load)):
-        if status_load[i] != updated_load[i]:
-            if start is None:
-                start = i
-        else:
+        if status_load[i] == updated_load[i]:
             if start is not None:
                 diff_ranges.append((start, i-1))
                 start = None
-    
+
+        elif start is None:
+            start = i
     if start is not None:
         diff_ranges.append((start, len(status_load)-1))
-    
+
     lengths = [(t[1]-t[0]+1) for t in diff_ranges]
     return lengths, diff_ranges
 
@@ -159,5 +159,4 @@ def get_annual_mileage_per_ev(
         charging_profile, _ = filter_id(charging_profile, filter, "home")
 
     distance_df = charging_profile.iloc[:, charging_profile.columns.get_level_values(1)=='distance']
-    annual_mileage = np.sum(distance_df, axis=0)
-    return annual_mileage
+    return np.sum(distance_df, axis=0)
