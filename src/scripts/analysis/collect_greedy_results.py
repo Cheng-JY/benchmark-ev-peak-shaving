@@ -133,18 +133,18 @@ Usage
 -----
 Windows Command Prompt, using the default output directory:
 
-    python ecv2g\user_dirs\jcheng\scripts\collect_greedy_results.py ^
+    python ecv2g\user_dirs\jcheng\scripts\analysis\collect_greedy_results.py ^
         --data-root "data\data_20260923_2"
 
 Windows Command Prompt, specifying an output directory:
 
-    python ecv2g\user_dirs\jcheng\scripts\collect_greedy_results.py ^
+    python ecv2g\user_dirs\jcheng\scripts\analysis\collect_greedy_results.py ^
         --data-root "data\data_20260923_2" ^
         --output-dir "data\data_20260923_2\greedy_collected_results"
 
 Linux or macOS:
 
-    python ecv2g/user_dirs/jcheng/scripts/collect_greedy_results.py \
+    python ecv2g/user_dirs/jcheng/scripts/analysis/collect_greedy_results.py \
         --data-root data/data_20260923_2 \
         --output-dir data/data_20260923_2/greedy_collected_results
 

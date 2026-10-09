@@ -175,4 +175,7 @@ cython_debug/
 .pypirc
 
 # 
+
+# Local data and editor settings
 **/data/
+.idea/
