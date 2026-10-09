@@ -2,13 +2,13 @@ r"""Two-stage polynomial V2G model; regression target = uncontrolled_peak_MW - o
 
 Train: 
     python src\scripts\train\run_v2g_regression_MW.py train ^
-        --input "data\training set.zip" ^
-        --output data\models
+        --input "data\training\training_set.zip" ^
+        --output data\training\model
 Predict: 
     python src\scripts\train\run_v2g_regression_MW.py predict 
-        --model data/models/model.joblib 
-        --input data/training_set/predected_features.csv 
-        --output data/training_set/predictions.csv
+        --model data\models\model.joblib 
+        --input data\training\prediction_inputs_complete.csv
+        --output data\training_set\predictions_result.csv
 Only load joblib models you trust. Fixed hyperparameters; held-out regions are not used for fitting.
 """
 import argparse
