@@ -9,12 +9,12 @@ Each option is run independently and written to ``greedy_results_N`` with:
 * ``greedy_peak_shaving_summary.csv``
 * ``source_columns.csv``
 
-python src\scripts\run_example.py ^
-    --ev-csv "data\data_20260922_2\ch_profiles_agg_home_DEU_20260922_2026_cal2026_R0_0.8.csv" ^
-    --heat-pump-csv "data\data_20260922_2\heat_pump_profiles.csv" ^
-    --household-csv "data\data_20260922_2\household_load.csv" ^
-    --options-file "data\data_20260922_2\option1.txt" ^
-    --output-root "data\data_20260922_2\greedy_results_0.8"
+python src\scripts\run_coordination\run_example.py ^
+    --ev-csv "data\data_20260928_2\ch_profiles_agg_home_DEU_20260928_2026_cal2026_R0_0.8.csv" ^
+    --heat-pump-csv "data\data_20260928_2\heat_pump_profiles.csv" ^
+    --household-csv "data\data_20260928_2\household_load.csv" ^
+    --options-file "data\data_20260928_2\option1.txt" ^
+    --output-root "data\data_20260928_2\greedy_results_0.8"
 
 A combined ``greedy_all_options_summary.csv`` is written to the output root.
 All optimizer calculations use MWh per one-hour step; power outputs are MW.

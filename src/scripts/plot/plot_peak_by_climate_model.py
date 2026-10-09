@@ -9,7 +9,7 @@ baseline uses ``ch_refuel_cp``.
 Examples (Windows cmd.exe)
 --------------------------
 
-python src\scripts\plot_peak_by_climate_model.py ^
+python src\scripts\plot\plot_peak_by_climate_model.py ^
   "data\data_20260928" ^
   --option 2 ^
   --output "data\data_20260928\option2_peak_by_climate_model.pdf"

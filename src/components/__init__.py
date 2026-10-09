@@ -5,11 +5,8 @@ The :mod:`jcheng.components` module
 from importlib import import_module
 
 __all__ = [
-    "aggregation",
-    "analysis",
     "input_data",
     "optimizer",
-    "regression",
     "scenario",
 ]
 

@@ -7,7 +7,7 @@ optimized peak at or below the feeder peak limit receive a black border. If
 
 Windows example:
 
-    python src\scripts\plot_participation_hp_heatmap.py ^
+    python src\scripts\plot\plot_participation_hp_heatmap.py ^
       --input-dir "data\data_20260928_1\scenarios" ^
       --output-dir "data\data_20260928_1\scenarios\participation_hp_heatmap"^
       --ev-count 97

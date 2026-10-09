@@ -1,6 +1,14 @@
-"""Two-stage polynomial V2G model; regression target = uncontrolled_peak_MW - optimized_peak_MW (MW). Requires pandas, numpy, scikit-learn, joblib.
-Train: python train_cross_region_v2g.py train --input "training set.zip" --output models
-Predict: python train_cross_region_v2g.py predict --model models/model.joblib --input new.csv --output predictions.csv
+r"""Two-stage polynomial V2G model; regression target = uncontrolled_peak_MW - optimized_peak_MW (MW). Requires pandas, numpy, scikit-learn, joblib.
+
+Train: 
+    python src\scripts\train\run_v2g_regression_MW.py train ^
+        --input "data\training set.zip" ^
+        --output data\models
+Predict: 
+    python src\scripts\train\run_v2g_regression_MW.py predict 
+        --model data/models/model.joblib 
+        --input data/training_set/predected_features.csv 
+        --output data/training_set/predictions.csv
 Only load joblib models you trust. Fixed hyperparameters; held-out regions are not used for fitting.
 """
 import argparse
@@ -23,7 +31,6 @@ NUMERIC = ['ev_count', 'participation_rate_requested', 'scenario_hp_ratio', 'ch_
            'ev_power_to_base_peak', 'soc_range_to_base_peak_hours']
 CATEGORY = ['charging_avail_reduction_type', 'availability_family', 'soc_min_family']
 FEATURES = NUMERIC + CATEGORY
-
 
 def read_inputs(paths):
     """Read inputs.

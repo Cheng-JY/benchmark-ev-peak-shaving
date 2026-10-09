@@ -3,7 +3,6 @@
 from importlib import import_module
 
 __all__ = [
-    "vehicle_data",
     "HeatPumpProfileBuilder",
     "HouseholdProfileBuilder",
 ]

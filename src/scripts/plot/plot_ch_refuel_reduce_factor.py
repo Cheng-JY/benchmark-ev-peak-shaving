@@ -6,7 +6,7 @@ uncontrolled feeder peak.  A conceptual no-flexibility reference point is
 added at retention factor 0 with a value of 100%.
 
 Example (Windows cmd.exe):
-    python src\scripts\plot_ch_refuel_reduce_factor.py ^
+    python src\scripts\plot\plot_ch_refuel_reduce_factor.py ^
       --input-csv "data\data_20260923_2\greedy_collected_results\greedy_results_tidy.csv" ^
       --output-dir "data\data_20260923_2\plots" ^
       --ch-refuel 0.4

@@ -9,16 +9,12 @@ __all__ = [
     "BaseEVOptimizer",
     "GreedyEVOptimizer",
     "OptimizationConfig",
-    "PyomoBasicEVOptimizer",
-    "PyomoBidirectionalEVOptimizer"
 ]
 
 _MODULE_BY_NAME = {
     "BaseEVOptimizer": "base_optimizer",
     "GreedyEVOptimizer": "greedy_optimizer",
     "OptimizationConfig": "optimization_config",
-    "PyomoBasicEVOptimizer": "milp_basic_optimizer",
-    "PyomoBidirectionalEVOptimizer": "milp_bidi_optimizer",
 }
 
 

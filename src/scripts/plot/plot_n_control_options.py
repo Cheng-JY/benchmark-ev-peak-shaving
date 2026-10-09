@@ -7,7 +7,7 @@ realized controlled-EV share from ``n_controlled_realized`` by default.
 
 Example (Windows cmd.exe)
 -------------------------
-python src\scripts\plot_n_control_options.py ^
+python src\scripts\plot\plot_n_control_options.py ^
     --data-root "data\data_20260921_1\scenarios\hh_1__hp_1__ev_1__Kassel_2050__seed_13\data_20260921_357" ^
     --output-dir "data\data_20260921_1\scenarios\hh_1__hp_1__ev_1__Kassel_2050__seed_13\data_20260921_357\figures"
 
