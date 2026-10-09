@@ -1,10 +1,9 @@
-import numpy as np
-import pandas as pd
-from ._data import load_csv, data_path, get_household_load
-import re
+"""Calculation utilities for the EV/V2G analysis workflow."""
 
-def calculate_SoC(SoC_prev, charging, consumption):
-    return np.max(SoC_prev + charging - consumption, 0)
+import pandas as pd
+import numpy as np
+import re
+from ._data import load_csv, data_path, get_household_load
 
 def get_updated_load(
         result_df,
@@ -13,6 +12,25 @@ def get_updated_load(
         household_input:str="case_study_time_series_sum",
         hp_portion:float=1,
 ):  
+    """Return updated load.
+    
+    Parameters
+    ----------
+    result_df : object
+        Result df used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    charging_threshold : float
+        Charging threshold used by this operation.
+    household_input : str
+        Household input used by this operation.
+    hp_portion : float
+        Hp portion used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``load``."""
     hh_profile = load_csv(data_path(), household_input, sep=";")
     household_load = get_household_load(hh_profile, hh_keyword="hh", hp_portion=hp_portion, hp_keyword="hp")
     load = household_load
@@ -26,20 +44,34 @@ def get_influence_length(
     status_load,
     updated_load,
 ):
+    """Return influence length.
+    
+    Parameters
+    ----------
+    status_load : object
+        Status load used by this operation.
+    updated_load : object
+        Updated load used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``(lengths, diff_ranges)``."""
     diff_ranges = []
     start = None
 
     for i in range(len(status_load)):
-        if status_load[i] == updated_load[i]:
+        if status_load[i] != updated_load[i]:
+            if start is None:
+                start = i
+        else:
             if start is not None:
                 diff_ranges.append((start, i-1))
                 start = None
-
-        elif start is None:
-            start = i
+    
     if start is not None:
         diff_ranges.append((start, len(status_load)-1))
-
+    
     lengths = [(t[1]-t[0]+1) for t in diff_ranges]
     return lengths, diff_ranges
 
@@ -48,8 +80,23 @@ def get_ch_avail_hours(
         plug_state:str="_plug2",
         filter:list=None,        
 ):
+    """Return ch avail hours.
+    
+    Parameters
+    ----------
+    charging_profile : pd.DataFrame
+        Charging profile used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    filter : list
+        Filter used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``(n_ch_avail, n_ch_avail / (n_length * n_ev) * (30 * 24))``."""
     if filter is not None:
-        charging_profile, n_ev = filter_id(charging_profile, filter, "home")
+        charging_profile, n_ev = filter_id(charging_profile, filter)
     
     ev_id_list = charging_profile.columns.get_level_values(0).unique()
 
@@ -65,9 +112,27 @@ def get_ch_avail_hours_per_ev(
         plug_state:str="_plug2",
         filter:list=None
 ):
+    """Return ch avail hours per ev.
+    
+    Parameters
+    ----------
+    charging_profile : pd.DataFrame
+        Charging profile used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    filter : list
+        Filter used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``n_ch_avail / n_length * (30 * 24)``."""
     if filter is not None:
-        charging_profile, _ = filter_id(charging_profile, filter, "home")
+        charging_profile, n_ev = filter_id(charging_profile, filter)
+    
+    ev_id_list = charging_profile.columns.get_level_values(0).unique()
 
+    n_ev = len(ev_id_list)
     n_length = len(charging_profile.index)
 
     ch_avail_df = charging_profile.iloc[:, charging_profile.columns.get_level_values(1)==f'ch_avail{plug_state}']
@@ -79,9 +144,27 @@ def get_ch_avail_hours_per_ev_destination(
         plug_state:str="_plug2",
         filter:list=None
 ):
+    """Return ch avail hours per ev destination.
+    
+    Parameters
+    ----------
+    charging_profile : pd.DataFrame
+        Charging profile used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    filter : list
+        Filter used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``counts / n_length * (30 * 24)``."""
     if filter is not None:
-        charging_profile, _ = filter_id(charging_profile, filter, "home")
+        charging_profile, n_ev = filter_id(charging_profile, filter)
+    
+    ev_id_list = charging_profile.columns.get_level_values(0).unique()
 
+    n_ev = len(ev_id_list)
     n_length = len(charging_profile.index)
 
     column_mask = charging_profile.columns.get_level_values(1).isin([f'ch_avail{plug_state}', 'destination'])
@@ -101,8 +184,25 @@ def get_ch_avail_hours_per_ev_month(
         filter:list=None,
         previous_result:dict=None,
 ):
+    """Return ch avail hours per ev month.
+    
+    Parameters
+    ----------
+    charging_profile : pd.DataFrame
+        Charging profile used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    filter : list
+        Filter used by this operation.
+    previous_result : dict
+        Previous result used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``result_month``."""
     if filter is not None:
-        charging_profile, _ = filter_id(charging_profile, filter, "home")
+        charging_profile, n_ev = filter_id(charging_profile, filter)
     
     ch_avail_df = charging_profile.iloc[:, charging_profile.columns.get_level_values(1)==f'ch_avail{plug_state}']
     result_month = {}
@@ -116,7 +216,7 @@ def get_ch_avail_hours_per_ev_month(
         result_month[i] = n_ch_avail_month
     return result_month
 
-def filter_id(profiles, filters: str, key_filter: str) -> pd.DataFrame:
+def filter_id(profiles, filters: list) -> pd.DataFrame:
     """
     example filter: ['01-.....-7123-..1111-H..A00S000-1.']
     key composition (meaning of the characters):
@@ -148,15 +248,117 @@ def filter_id(profiles, filters: str, key_filter: str) -> pd.DataFrame:
     profiles_filt = profiles[filtered_profile_list]
     profiles_filt.columns = profiles_filt.columns.remove_unused_levels()
     nprofiles = len(profiles_filt.columns.levels[0])
-    print(f'filtered {nprofiles} out of {len(profiles.columns.levels[0])} profiles for {key_filter}: {filters}')
     return profiles_filt, nprofiles
+
+def filter_id_with_list(id_list, filters:str, key_filter:str):
+    """Filter id with list.
+    
+    Parameters
+    ----------
+    id_list : object
+        Id list used by this operation.
+    filters : str
+        Filters used by this operation.
+    key_filter : str
+        Key filter used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``(filtered_profile_list, nprofiles)``.
+    
+    Raises
+    ------
+    ValueError
+        If an explicit validation or processing check in this operation fails."""
+    if len(filters[0]) < 34:
+        raise ValueError("not the right filter length")
+    if filters[0][2] != '-' or filters[0][8] != '-' or filters[0][13] != '-' :
+        raise ValueError("block size not as required or wrong spacers. needs to be 2-5-4-6-10-2")
+    filtered_profile_list = []
+    for filter in filters:
+        filtered_profile_list += [id for id in id_list if re.match(re.compile(filter), id)]
+    nprofiles = len(filtered_profile_list)
+    return filtered_profile_list, nprofiles
 
 def get_annual_mileage_per_ev(
         charging_profile:pd.DataFrame,
+        plug_state:str="_plug2",
         filter:list=None
 ):
+    """Return annual mileage per ev.
+    
+    Parameters
+    ----------
+    charging_profile : pd.DataFrame
+        Charging profile used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    filter : list
+        Filter used by this operation.
+    
+    Returns
+    -------
+    object
+        Result computed as ``annual_mileage``."""
     if filter is not None:
-        charging_profile, _ = filter_id(charging_profile, filter, "home")
+        charging_profile, n_ev = filter_id(charging_profile, filter, "home")
+    
+    ev_id_list = charging_profile.columns.get_level_values(0).unique()
+
+    n_ev = len(ev_id_list)
+    n_length = len(charging_profile.index)
 
     distance_df = charging_profile.iloc[:, charging_profile.columns.get_level_values(1)=='distance']
-    return np.sum(distance_df, axis=0)
+    annual_mileage = np.sum(distance_df, axis=0)
+    return annual_mileage
+
+def calculate_plug_in_duration(profile, des, month, plug_state:str="_plug2"):
+    """Calculate plug in duration.
+    
+    Parameters
+    ----------
+    profile : object
+        Profile used by this operation.
+    des : object
+        Des used by this operation.
+    month : object
+        Month used by this operation.
+    plug_state : str
+        Plug state used by this operation.
+    
+    Returns
+    -------
+    object
+        Computed result for the selected input and execution branch.
+    
+    Raises
+    ------
+    KeyError
+        If an explicit validation or processing check in this operation fails."""
+    ch_avail_col = f"ch_avail{plug_state}"
+
+    # Destination-specific adjustment (for travel/highway)
+    if des in (4, 5):
+        ch_avail_col = "ch_avail_travel"
+
+    # Validate column
+    if ch_avail_col not in profile.columns:
+        raise KeyError(f"Column '{ch_avail_col}' not found in profile DataFrame.")
+
+    # Subset for given month and destination
+    month_mask = profile.index.month == month
+    dest_mask = profile["destination"] == des
+    df_sub = profile.loc[month_mask & dest_mask, ch_avail_col]
+
+    if df_sub.empty:
+        return 0.0
+
+    # Count time steps where EV was plugged in (availability > 0)
+    plug_in_counts = np.count_nonzero(df_sub > 0)
+
+    # Convert number of 15-min intervals to hours
+    plug_in_duration_h = plug_in_counts * 0.25
+
+    return plug_in_duration_h
+

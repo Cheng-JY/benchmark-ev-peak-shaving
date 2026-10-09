@@ -1,197 +1,205 @@
-import numpy as np
-import pandas as pd
+"""Aggregation utilities for the EV/V2G analysis workflow."""
 
 import os
 from copy import deepcopy
 import logging
-from _calculation import * 
-from _data import data_path
+import pandas as pd
+import numpy as np
+from jcheng.utils._calculation import * 
+from jcheng.utils._data import *
+import ast
+from pathlib import Path
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-def run_aggregation_profile(data_folder_name:str, 
-                            date_input:str, 
-                            region_group:str,
-                            charging_profiles:pd.DataFrame,
-                            n_profiles:int, 
-                            controlled_portion:dict[str, float],
-                            profile_input:str="ch_profiles",
-                            profile_output:str="ch_profiles_agg",
-                            hourly_profiles:bool=True,
-                            sampled_filename:str|None=None,
-                            random_seed:int=42,
-                            is_standard:bool=True):
-    """
-    Aggregate charging profiles for a given region and controlled portion distribution.
-
-    This function loads charging profiles from a given folder, aggregates them according to the controlled portion,
-    and saves the aggregated profiles as CSV and Parquet files.
-
+def run_aggregation_profile(data_folder_ev: Path,
+                            data_folder_agg: Path,
+                            data_input_filename: str,
+                            data_output_filename: str,
+                            total_part: int,
+                            sampled_ev_list: list,
+                            sampled_ev_group_name: str="",
+                            hourly_profiles: bool=True):
+    """Run aggregation profile.
+    
     Parameters
     ----------
-    data_folder_name : str
-        Path to the folder containing the data files.
-    date_input : str
-        The input date in "YYYYMMDD" format used to identify the input file.
-    region_group : str
-        The name of the region group for which the aggregation is performed.
-    n_profiles : int
-        Number of profiles to aggregate. If the available profiles are fewer, it uses the maximum available profiles.
-    controlled_portion : dict[str, float]
-        A dictionary defining the portion of profiles for each controlled category (e.g., uncontrolled, controlled_wo_v2g, controlled_v2g, etc.).
-        The sum of the values in this dictionary should ideally equal 1.
-    profile_input : str, optional
-        Prefix for the input profile filename, by default "ch_profiles".
-    profile_output : str, optional
-        Prefix for the output profile filename, by default "ch_profiles_agg_".
-
-    Returns
-    -------
-    None
-        Saves aggregated profiles as CSV and Parquet files in the specified folder.
-    """
-    profile, n_ev = deepcopy(charging_profiles), len(charging_profiles.columns.levels[0])
-
-    if n_ev == 0:
-        logger.warning(f"No profiles found. Generate more profiles.")
-        return
-
-    # logger.info(f'loaded region: {region_group} with {n_ev} profiles')
-
-    n_profiles = np.minimum(n_profiles, n_ev)
-
-    n_prev = 0
-    ev_id_list = profile.columns.get_level_values(0).unique()
-    np.random.seed(random_seed)
-
-    if os.path.exists(os.path.join(data_path(data_folder_name), 
-                                                  f"{sampled_filename}.csv")):
-        sampled_elements = pd.read_csv(os.path.join(data_path(data_folder_name), 
-                                                  f"{sampled_filename}.csv")).squeeze().tolist()
-        n_sampled_elements = len(sampled_elements)
-        remaining_elements = list(set(ev_id_list) - set(sampled_elements))
+    data_folder_ev : Path
+        Data folder ev used by this operation.
+    data_folder_agg : Path
+        Data folder agg used by this operation.
+    data_input_filename : str
+        Data input filename used by this operation.
+    data_output_filename : str
+        Data output filename used by this operation.
+    total_part : int
+        Total part used by this operation.
+    sampled_ev_list : list
+        Sampled ev list used by this operation.
+    sampled_ev_group_name : str
+        Sampled ev group name used by this operation.
+    hourly_profiles : bool
+        Hourly profiles used by this operation."""
+    agg_result = None
+    for part in range(total_part):
+        filename = f"{data_input_filename}_part0{part}.parquet"
+        fp = data_folder_ev / filename
+        profile_df = pd.read_parquet(fp)
+        profile_agg = aggregate_profile(profile_df,
+                                    sampled_ev_list,
+                                    hourly_profiles)
+        if agg_result is None:
+            agg_result = profile_agg
+        else:
+            agg_result = agg_result + profile_agg            
         
-        n_new_sampled = n_profiles - n_sampled_elements
-        if n_new_sampled > 0:
-            new_sampled_elements = np.random.choice(remaining_elements, n_new_sampled, replace=False).tolist()
-            sampled_elements += new_sampled_elements
-    else:
-        sampled_elements = np.random.choice(ev_id_list, n_profiles, replace=False)
-    
-    sampled_index = pd.Index(sampled_elements)
-    sampled_filename = "sampled_ev_profiles" if sampled_filename is None else sampled_filename
-    sampled_index.to_series().to_csv(os.path.join(data_path(data_folder_name), 
-                                                    f"{sampled_filename}.csv"), index=False)
-    
-    for key in controlled_portion.keys():
-        if controlled_portion.get(key) <= 1:
-            n_ev_part = int(n_profiles * controlled_portion.get(key))
-        else:
-            n_ev_part = int(controlled_portion.get(key))
-
-        if n_ev_part < 1e-8:
-            A = profile[ev_id_list[0]]
-            controll_profile_agg = pd.DataFrame(0, index=A.index, columns=A.columns)
-        else:
-            controll_profile = profile[sampled_index[n_prev:n_prev+n_ev_part]]
-            controll_profile_agg = controll_profile.T.groupby(level=1).sum().T
-            controll_profile_agg = controll_profile_agg / 1000 # convert to MW
-            n_prev += n_ev_part
+    nprofiles = len(sampled_ev_list)
+    agg_result.loc[agg_result.index[0], 'nprofiles'] = nprofiles
         
-        if is_standard:
-            controll_profile_agg['nprofiles'] = np.nan
-            controll_profile_agg.at[controll_profile_agg.index[0], 'nprofiles'] = n_ev_part
-            
-            if hourly_profiles:
-                controll_profile_agg = controll_profile_agg.resample('h').agg({
-                        'ch_avail': 'mean', 'ch_avail_plug2': 'mean', 
-                        'SOCmax': 'first', 'SOCmin': 'first', 'SOCmax_plug2': 'first', 'SOCmin_plug2': 'first',
-                        'distance': 'sum','ch_direct': 'sum', 'ch_refuel': 'sum', 'ch_travel': 'sum', 
-                        'consumption': 'sum', 'dem_temp': 'sum', 'max_el_distance': 'sum',
-                        })
-        else:
-            controll_profile_agg.rename(columns={'Power_Availability': 'ch_avail'}, inplace=True)
-            controll_profile_agg.rename(columns={'charging_direct': 'ch_direct'}, inplace=True)
-            controll_profile_agg.rename(columns={'charging_refuel': 'ch_refuel'}, inplace=True)
-            controll_profile_agg.rename(columns={'demand_temperature': 'dem_temp'}, inplace=True)
+    profile_output = f'{data_output_filename}_{sampled_ev_group_name}_{int(nprofiles)}.csv'
+    file_path = data_folder_agg / profile_output
+    agg_result.to_csv(file_path, sep=";")
 
-            
-        controll_profile_agg.to_csv(os.path.join
-                                    (data_path(data_folder_name), profile_output + '_' + key + '.csv'), sep=";")
-        controll_profile_agg.to_parquet(os.path.join
-                                        (data_path(data_folder_name), profile_output + '_' + key + '.parquet'))
-        logger.info(f'aggregated profiles saved to {profile_output + key}.csv in {data_folder_name}')
-
-def aggregate_household(
-        data_folder_name:str|None=None,
-        profile_input:str="case_study_time_series",
-        profile_output:str="case_study_time_series_sum",
-        hourly_profiles:bool=True):
-    
-    input_file = os.path.join(data_path(data_folder_name), profile_input + '.csv')
-    
-    profile_df = pd.read_csv(input_file, sep=",", header=[0,1], parse_dates=[0], index_col=0)
-    
-    df_filt, nprofiles = deepcopy(profile_df), len(profile_df.columns.levels[0])
-
-    df_filt = df_filt.apply(pd.to_numeric, errors='coerce')
-
-    profile_df_agg = df_filt.T.groupby(level=1).sum().T
-    if not isinstance(profile_df_agg.index, pd.DatetimeIndex):
-        profile_df_agg.index = pd.to_datetime(profile_df_agg.index, format="%d.%m.%Y %H:%M")
-
-    profile_df_agg['nprofiles'] = np.nan
-    profile_df_agg[profile_df_agg.index[0], 'nprofiles'] = nprofiles
-    
-    if hourly_profiles:
-        profile_df_agg = profile_df_agg.resample('h').agg({
-            'PV and price optimized': 'sum',  'PV generation': 'sum', 'PV optimized': 'sum',
-            'direct': 'sum', 'household load': 'sum', 'price optimized': 'mean'
-        })
-    
-    profile_df_agg.to_csv(os.path.join(
-        data_path(data_folder_name), profile_output + '.csv'), sep=";")
-    profile_df_agg.to_parquet(os.path.join(
-        data_path(data_folder_name), profile_output + '.parquet'))
-    
-    logger.info(f'aggregated profiles saved to {profile_output}.csv in {data_folder_name}')
-
-def aggregate_profile(
-        charging_profiles:pd.DataFrame,
-        profile_output:str="ch_profiles_agg",
-        hourly_profiles:bool=True,      
-):  
-    profile_agg = charging_profiles.T.groupby(level=1).sum().T
-    profile_agg = profile_agg / 1000 # convert to MW
-
-    if hourly_profiles:
-        profile_agg = profile_agg.resample('h').agg({
-                'ch_avail': 'mean', 'ch_avail_plug2': 'mean', 
-                'SOCmax': 'first', 'SOCmin': 'first', 'SOCmax_plug2': 'first', 'SOCmin_plug2': 'first',
-                'distance': 'sum','ch_direct': 'sum', 'ch_refuel': 'sum', 'ch_travel': 'sum', 
-                'consumption': 'sum', 'dem_temp': 'sum', 'max_el_distance': 'sum',
-                })
-            
-    profile_agg.to_csv(profile_output + '_' + '.csv', sep=";")
-    profile_agg.to_parquet(profile_output + '_' + '.parquet')
     logger.info(f'aggregated profiles saved to {profile_output}.csv')
 
-
-if __name__ == "__main__":
-    date_input = '20241127'
-    data_folder_name = f'data_{date_input}'
-
-    controlled_portion = {
-        "uncontrolled": 0,
-        "controlled_wo_v2g": 0,
-        "controlled_v2g": 1,
-    }
-    n_ev_profiles = 100
-    filename = "ch_profiles_DEU_20241122_2012_cal2012_R2"
-    refuel=""
+def aggregate_profile(
+        profile_df:pd.DataFrame,
+        sample_ev_id_list:list[str],
+        hourly_profiles:bool=True,    
+):  
+    """Aggregate profile.
     
-    run_aggregation_profile(data_folder_name, date_input, 'R2', n_ev_profiles, controlled_portion, hourly_profiles=False, filename_input=filename, refuel=refuel)
+    Parameters
+    ----------
+    profile_df : pd.DataFrame
+        Profile df used by this operation.
+    sample_ev_id_list : list[str]
+        Sample ev id list used by this operation.
+    hourly_profiles : bool
+        Hourly profiles used by this operation.
+    
+    Returns
+    -------
+    object
+        Computed result for the selected input and execution branch."""
+    if not isinstance(profile_df.index, pd.DatetimeIndex):
+        # assume index is minutes
+        profile_df = profile_df.copy()
+        profile_df.index = pd.to_timedelta(profile_df.index, unit="m") + pd.DatetimeIndex('2012-01-01')
 
+    if not isinstance(profile_df.columns, pd.MultiIndex):
+        tuples = [ast.literal_eval(col_str) for col_str in profile_df.columns]
+        mi = pd.MultiIndex.from_tuples(tuples, names=['ev_id', 'variable'])
+        profile_df.columns = mi
+    existing_ids = profile_df.columns.get_level_values(0).unique()
+    valid_ids = [ev for ev in sample_ev_id_list if ev in existing_ids]
+    if valid_ids == []:
+        logger.warning("No valid EV IDs found in the profile DataFrame.")
+        return pd.DataFrame()
+    idx = pd.IndexSlice
+    df_sub = profile_df.loc[:, idx[valid_ids, :]]
+    
+    profile_df_agg = df_sub.T.groupby(level=1).sum().T
+    profile_df_agg['nprofiles'] = np.nan
+    profile_df_agg = profile_df_agg / 1000 # convert to MW
+    profile_df_agg.at[profile_df_agg.index[0], 'nprofiles'] = len(df_sub.columns.get_level_values(0).unique())
 
+    columns_to_drop = [
+        'destination', 'ch_avail_travel', 'SOCmax_travel',
+        'dem_temp_travel', 'consumption_travel'
+    ]
+    columns_to_drop = [col for col in columns_to_drop if col in profile_df_agg.columns]
+    profile_df_agg = profile_df_agg.drop(columns=columns_to_drop)
+
+    profile_df_agg = profile_df_agg.rename(columns={
+    "Strecke": "distance", "Power_Availability": "ch_avail", 
+    "SOC_refuel": "SOCmax_plug2", "charging_direct": "ch_direct","charging_refuel": "ch_refuel",
+    "demand_temperature": "dem_temp"})
+
+    if hourly_profiles:
+        aggregation_methods = {
+            'ch_avail': 'mean',
+            'ch_avail_plug2': 'mean',
+            'soc_min': 'first',
+            'soc_max': 'first',
+            'soc_max_plug2': 'first',
+            'soc_min_plug2': 'first',
+            'soc_refuel': 'first',
+            'soc_max_travel': 'first',
+            'distance': 'sum',
+            'ch_direct': 'sum',
+            'ch_refuel': 'sum',
+            'ch_travel': 'sum',
+            'consumption': 'sum',
+            'dem_temp': 'sum',
+            'max_el_distance': 'sum',
+            'nprofiles': 'first',
+        }
+
+        # Filter the aggregation methods to only include existing columns
+        existing_agg_methods = {col: method for col, method in aggregation_methods.items() 
+                                if col in profile_df_agg.columns}
+
+        # Perform the resampling and aggregation
+        profile_df_agg = profile_df_agg.resample('1h').agg(existing_agg_methods)
+
+    return profile_df_agg
+
+def find_extra_ev_rows(file_1127_path, file_1203_path):
+    # 1. 读取两个 CSV 文件，指定分隔符为分号
+    """Find extra ev rows.
+    
+    Parameters
+    ----------
+    file_1127_path : object
+        File 1127 path used by this operation.
+    file_1203_path : object
+        File 1203 path used by this operation.
+    
+    Returns
+    -------
+    object
+        Computed result for the selected input and execution branch."""
+    df_1127 = pd.read_csv(file_1127_path, delimiter=';')
+    df_1203 = pd.read_csv(file_1203_path, delimiter=';')
+
+    # 2. 计算每个 hh_id 在两个文件中的出现次数 (EV数量)
+    counts_1127 = df_1127['hh_id'].value_counts()
+    counts_1203 = df_1203['hh_id'].value_counts()
+
+    print(counts_1127 - counts_1203)
+
+    extra_rows_list = []
+
+    # 3. 遍历 1127 中的每个 hh_id，找出数量比 1203 多的情况
+    for hh_id in counts_1127.index:
+        count_in_1127 = counts_1127[hh_id]
+        # 获取该 id 在 1203 中的数量，如果没有则为 0
+        count_in_1203 = counts_1203.get(hh_id, 0)
+
+        # 如果 1127 中的数量更多，则提取多出来的行
+        if count_in_1127 > count_in_1203:
+            diff = count_in_1127 - count_in_1203
+            
+            
+            # 获取该 hh_id 在 1127 中的所有行
+            rows = df_1127[df_1127['hh_id'] == hh_id]
+            
+            # 截取最后 diff 行作为“多余”的行
+            # (注意：这里假设多出来的行是追加在后面的；如果没有特定顺序，通常取最后几行作为差集)
+            extras = rows.iloc[-diff:]
+            extra_rows_list.append(extras)
+
+    # 4. 如果找到了多余的行，合并并保存
+    if extra_rows_list:
+        result_df = pd.concat(extra_rows_list)
+        print(f"找到了 {len(result_df)} 行多余的数据。")
+        print("涉及的 hh_id 及其多余数量：")
+        print(result_df['hh_id'].value_counts())
+        
+        return result_df
+    else:
+        print("未发现 1127 文件中有基于 hh_id 的多余行。")
+        return pd.DataFrame()

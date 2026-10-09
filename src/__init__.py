@@ -1,7 +1,1 @@
-__all__ = [
-    "approaches",
-    "data",
-    "utils",
-    ]
-
-__version__ = "latest"
+"""User-dependent V2G simulation and analysis tools."""

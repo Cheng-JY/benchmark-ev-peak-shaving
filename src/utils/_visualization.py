@@ -1,3 +1,5 @@
+"""Visualization utilities for the EV/V2G analysis workflow."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -6,6 +8,16 @@ def plot_avail_charging_scatter(
     n_ev: int,
     filename: str = "ch_avail_per_ev_scatter",
 ): 
+    """Plot avail charging scatter.
+    
+    Parameters
+    ----------
+    results_dict : dict[float, list[float]]
+        Results dict used by this operation.
+    n_ev : int
+        N ev used by this operation.
+    filename : str
+        Filename used by this operation."""
     plt.figure()
 
     for thr, durations in results_dict.items():
@@ -24,10 +36,20 @@ def plot_avail_charging_boxplot(
     n_ev: int,
     filename: str = "ch_avail_per_ev_boxplot",
 ): 
+    """Plot avail charging boxplot.
+    
+    Parameters
+    ----------
+    results_dict : dict[float, list[float]]
+        Results dict used by this operation.
+    n_ev : int
+        N ev used by this operation.
+    filename : str
+        Filename used by this operation."""
     plt.figure()
 
     plt.boxplot(results_dict.values())
-    plt.xticks(list(range(1, 12)), list(results_dict.keys()))
+    plt.xticks([i for i in range(2, 11)], list(results_dict.keys()))
     plt.xlabel("ch_refuel_threshold")
     plt.ylabel("Plug in duration (h/month)")
     plt.title(f"Plug in duration vs ch_refuel_threshold home charing ({n_ev} evs)")
@@ -40,6 +62,18 @@ def plot_annual_mileage_ch_avail_scatter(
     ch_refuel_threshold: float,
     filename: str = "annual_mileage_ch_avail_scatter",
 ): 
+    """Plot annual mileage ch avail scatter.
+    
+    Parameters
+    ----------
+    annual_mileage : list[float]
+        Annual mileage used by this operation.
+    ch_avail_hours : list[float]
+        Ch avail hours used by this operation.
+    ch_refuel_threshold : float
+        Ch refuel threshold used by this operation.
+    filename : str
+        Filename used by this operation."""
     plt.figure()
     plt.scatter(annual_mileage, ch_avail_hours, s=10, facecolor='none', edgecolors='blue', label="Data")
     plt.xlabel("Annual mileage (km)")
