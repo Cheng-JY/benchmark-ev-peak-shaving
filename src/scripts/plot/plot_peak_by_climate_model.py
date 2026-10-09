@@ -8,14 +8,11 @@ baseline uses ``ch_refuel_cp``.
 
 Examples (Windows cmd.exe)
 --------------------------
-python plot_peak_by_climate_model.py ^
-  "data\data_20260827.zip" ^
-  --option 1
 
-python ecv2g\user_dirs\jcheng\scripts\plot_peak_by_climate_model.py ^
-  "data\data_20260917" ^
+python src\scripts\plot_peak_by_climate_model.py ^
+  "data\data_20260928" ^
   --option 2 ^
-  --output "data\data_20260917\option2_peak_by_climate_model.pdf"
+  --output "data\data_20260928\option2_peak_by_climate_model.pdf"
 """
 
 from __future__ import annotations

@@ -12,11 +12,7 @@ effect of the minimum-SoC constraint.
 
 Example (Windows cmd.exe)
 -------------------------
-python ecv2g\user_dirs\jcheng\scripts\plot_ch_refuel_soc.py ^
-    --input-csv "data\data_20260914\greedy_collected_results\greedy_results_tidy.csv" ^
-    --output-dir "data\data_20260914\figures" 
-
-python ecv2g\user_dirs\jcheng\scripts\plot_ch_refuel_soc.py ^
+python src\scripts\plot_ch_refuel_soc.py ^
     --input-csv "data\data_20260923_2\greedy_collected_results\greedy_results_tidy.csv" ^
     --output-dir "data\data_20260923_2\figures"
 
@@ -31,6 +27,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from .plot_utils import read_results
 
 
 DEFAULT_REFERENCE_OPTION = 1

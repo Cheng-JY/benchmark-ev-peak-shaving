@@ -5,7 +5,7 @@ in a separate folder and ``scenario_summary.csv`` is updated after each run.
 
 Example::
 
-    python -m jcheng.scripts.run_household_heat_pump_profiles ^
+    python -m src.scripts.run_household_heat_pump_profiles ^
       --date-input 20260929 --net-name uw_langenselbold ^
       --station-name "ST. Feldstr. 630KVATR" --region-name R4 ^
       --household-ratios 1.0 --hp-ratios 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 ^
@@ -48,12 +48,12 @@ def _load_generation_dependencies():
     global ScenarioConfig, ScenarioBuilder, ScenarioData, db, ph
     global list_station_names, get_lv_net
     try:
-        from jcheng.components.input_data import (
+        from src.components.input_data import (
             HeatPumpProfileBuilder,
             HouseholdProfileBuilder,
         )
-        from jcheng.components.scenario.config import ScenarioConfig
-        from jcheng.components.scenario.scenario_builder import (
+        from src.components.scenario.config import ScenarioConfig
+        from src.components.scenario.scenario_builder import (
             ScenarioBuilder,
             ScenarioData,
         )

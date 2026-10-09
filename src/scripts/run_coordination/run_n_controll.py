@@ -13,31 +13,13 @@ Each option is run independently and written to ``greedy_results_N`` with:
 A combined ``greedy_all_options_summary.csv`` is written to the output root.
 All optimizer calculations use MWh per one-hour step; power outputs are MW.
 
-python ecv2g\user_dirs\jcheng\scripts\run_n_controll.py ^
-  --ev-csv "data\data_20260824_21\ch_profiles_agg_home_controlled_nctrl0.40_DEU_20260824_2026_cal2026_R0.csv" ^
-  --uncontrolled-ev-csv "data\data_20260824_21\ch_profiles_agg_all_uncontrolled_nctrl0.40_DEU_20260824_2026_cal2026_R0.csv" ^
-  --heat-pump-csv "data\data_20260825\heat_pump_profiles.csv" ^
-  --household-csv "data\data_20260825\household_load.csv" ^
-  --options-file "data\data_20260824_9\option1.txt" ^
-  --output-root "data\data_20260824_21\greedy_results_nctrl0.40"
-
-python ecv2g\user_dirs\jcheng\scripts\run_n_controll.py ^
-  --ev-csv "data\data_20260901\ch_profiles_agg_home_controlled_nctrl1.00_DEU_20260901_2026_cal2026_R0.csv" ^
-  --heat-pump-csv "data\data_20260825\heat_pump_profiles.csv" ^
-  --household-csv "data\data_20260825\household_load.csv" ^
-  --options-file "data\data_20260824_1\data_20260824_9\option1.txt" ^
-  --output-root "data\data_20260901\greedy_results_nctrl1.00"
-
-python ecv2g\user_dirs\jcheng\scripts\run_n_controll.py ^
-  --ev-csv "data\data_20260910_1\data_20260910_100\ch_profiles_agg_home_controlled_nctrl1.00_DEU_20260910_2026_cal2026_R0.csv" ^
-  --uncontrolled-ev-csv "data\data_20260910_1\data_20260910_100\ch_profiles_agg_home_uncontrolled_nctrl0.90_DEU_20260910_2026_cal2026_R0.csv" ^
-  --heat-pump-csv "data\data_20260910\hh_1__hp_0p9__ev_1__Kassel_2050__seed_13\heat_pump\heat_pump_profiles.csv" ^
-  --household-csv "data\data_20260910\hh_1__hp_0p9__ev_1__Kassel_2050__seed_13\household\household_load.csv" ^
-  --options-file "data\data_20260910_1\option1.txt" ^
-  --output-root "data\data_20260910_1\scenarios\hh_1__hp_0p9__ev_1__Kassel_2050__seed_13\data_20260910_100\greedy_results_nctrl1.00"
-
-
-
+python src\scripts\run_coordination\run_n_controll.py ^
+  --ev-csv "data\data_20260928_1\data_20260928_10\ch_profiles_agg_home_controlled_nctrl1.00_DEU_20260928_2026_cal2026_R0.csv" ^
+  --uncontrolled-ev-csv "data\data_20260928_1\data_20260928_10\ch_profiles_agg_home_uncontrolled_nctrl0.90_DEU_20260928_2026_cal2026_R0.csv" ^
+  --heat-pump-csv "data\data_20260928\hh_1__hp_0p9__ev_1__Kassel_2050__seed_13\heat_pump\heat_pump_profiles.csv" ^
+  --household-csv "data\data_20260928\hh_1__hp_0p9__ev_1__Kassel_2050__seed_13\household\household_load.csv" ^
+  --options-file "data\data_20260928_1\option1.txt" ^
+  --output-root "data\data_20260928_1\scenarios\hh_1__hp_0p9__ev_1__Kassel_2050__seed_13\data_20260928_10\greedy_results_nctrl1.00"
 """
 
 from __future__ import annotations
@@ -58,10 +40,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from jcheng.components.optimizer.greedy_optimizer import (
+from src.components.optimizer.greedy_optimizer import (
     GreedyEVOptimizer,
 )
-from jcheng.components.optimizer.optimization_config import (  # noqa: E402
+from src.components.optimizer.optimization_config import (  # noqa: E402
     OptimizationConfig,
 )
 

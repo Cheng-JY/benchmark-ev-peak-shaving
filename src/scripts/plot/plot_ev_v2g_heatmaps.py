@@ -2,19 +2,9 @@
 r"""Plot an optimized-peak EV-growth × V2G-participation heatmap.
 
 Example (Windows cmd.exe):
-    python ecv2g\user_dirs\jcheng\scripts\plot_ev_v2g_heatmaps.py ^
-      --input-dir "data\data_20260903" ^
-      --output-dir "data\data_20260903\ev_v2g_heatmaps" ^
-      --option 1
-
-    python ecv2g\user_dirs\jcheng\scripts\plot_ev_v2g_heatmaps.py ^
-      --input-dir "data\data_20260910_1\scenarios\hh_1__hp_1__ev_1__Kassel_2050__seed_13" ^
-      --output-dir "data\data_20260910_1\scenarios\hh_1__hp_1__ev_1__Kassel_2050__seed_13\ev_v2g_heatmaps" ^
-      --option 2
-
-    python ecv2g\user_dirs\jcheng\scripts\plot_ev_v2g_heatmaps.py ^
-      --input-dir "data\data_20260928_1\scenarios\hh_1__hp_1__ev_1__Kassel_2026__seed_42" ^
-      --output-dir "data\data_20260928_1\scenarios\hh_1__hp_1__ev_1__Kassel_2026__seed_42\ev_v2g_heatmaps" ^
+    python src\scripts\plot\plot_ev_v2g_heatmaps.py ^
+      --input-dir "data\data_20260928_1\scenarios\hh_1__hp_1__ev_1__Kassel_2050__seed_13" ^
+      --output-dir "data\data_20260928_1\scenarios\hh_1__hp_1__ev_1__Kassel_2050__seed_13\ev_v2g_heatmaps" ^
       --option 2
 """
 
@@ -306,7 +296,7 @@ def build_matrices(
     uncontrolled_reference = selected_reference.combine_first(
         fallback_reference
     )
-    # 每个EV数量使用自己的uncontrolled peak，并填充到所有participation rate
+
     for ev_count in row_index:
         if ev_count in uncontrolled_reference.index:
             reference_peak = uncontrolled_reference.loc[ev_count]

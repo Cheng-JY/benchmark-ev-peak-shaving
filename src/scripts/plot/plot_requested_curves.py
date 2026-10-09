@@ -1,5 +1,5 @@
 r"""Three scenario curves from held-out predictions. Plot exclusions never change training data.
-    python ecv2g\user_dirs\jcheng\scripts\plot_requested_curves.py^
+    python src\scripts\plot_requested_curves.py^
   --input "data/training/region_validation_predictions.csv" ^
   --output "data/training/requested_curves" ^
   --station "ST. Feldstr. 630KVATR" ^

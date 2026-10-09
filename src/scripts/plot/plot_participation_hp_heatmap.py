@@ -7,12 +7,7 @@ optimized peak at or below the feeder peak limit receive a black border. If
 
 Windows example:
 
-    python ecv2g\user_dirs\jcheng\scripts\plot_participation_hp_heatmap.py ^
-      --input-dir "data\data_20260910_1\scenarios" ^
-      --output-dir "data\data_20260910_1\scenarios\participation_hp_heatmap"^
-      --ev-count 607
-
-    python ecv2g\user_dirs\jcheng\scripts\plot_participation_hp_heatmap.py ^
+    python src\scripts\plot_participation_hp_heatmap.py ^
       --input-dir "data\data_20260928_1\scenarios" ^
       --output-dir "data\data_20260928_1\scenarios\participation_hp_heatmap"^
       --ev-count 97
@@ -34,7 +29,7 @@ import pandas as pd
 
 
 SUMMARY_NAME = "greedy_all_options_summary.csv"
-"""
+
 DEFAULT_HP_COUNT_MAP = {
     0.0: 1,
     0.1: 2,
@@ -48,22 +43,8 @@ DEFAULT_HP_COUNT_MAP = {
     0.9: 51,
     1.0: 56,
 }
-"""
-DEFAULT_HP_COUNT_MAP = {
-    0.0: 0,
-    0.1: 1,
-    0.2: 2,
-    0.3: 3,
-    0.4: 4,
-    0.5: 5,
-    0.6: 6,
-    0.7: 7,
-    0.8: 8,
-    0.9: 10,
-    1.0: 12,
-}
 
-HOUSEHOLD_Number = 18
+HOUSEHOLD_Number = 56
 
 DEFAULT_OPTION_LABELS = {
     1: "Always plugged in",
@@ -106,22 +87,17 @@ def metadata_from_path(name: str) -> dict | None:
     normalized = "/" + name.replace("\\", "/").lstrip("/")
     scenario = SCENARIO_RE.search(normalized)
 
-    # 修改：查找路径中所有 data_xxx_数量
     ev_matches = EV_RE.findall(normalized)
 
     rate_match = RATE_RE.search(normalized)
 
-    # 修改：ev_match 改成 ev_matches
     if not (scenario and ev_matches and rate_match):
         return None
 
     return {
         "household_factor": encoded_number(scenario.group(1)),
         "hp_ratio": encoded_number(scenario.group(2)),
-
-        # 修改：使用最后一个匹配，即真正的 EV 数据文件夹
         "ev_count": int(ev_matches[-1]),
-
         "participation_rate": float(rate_match.group(1)),
     }
 

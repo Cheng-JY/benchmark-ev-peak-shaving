@@ -1,7 +1,5 @@
 r"""
-python ecv2g\user_dirs\jcheng\scripts\shortcut_reduce_ch_avail.py "data\data_20260914\ch_profiles_agg_home_DEU_20260914_2026_cal2026_R0_0.1.csv"  --output "data\data_20260914\ch_profiles_agg_home_DEU_20260914_2026_cal2026_R0_0.1.csv"
-
-python ecv2g\user_dirs\jcheng\scripts\shortcut_reduce_ch_avail.py "data\data_20260928_2\ch_profiles_agg_home_DEU_20260928_2026_cal2026_R0_0.1.csv"  --output "data\data_20260928_2\ch_profiles_agg_home_DEU_20260928_2026_cal2026_R0_0.1.csv"
+python src\scripts\shortcut_reduce_ch_avail.py "data\data_20260928_2\ch_profiles_agg_home_DEU_20260928_2026_cal2026_R0_0.1.csv"  --output "data\data_20260928_2\ch_profiles_agg_home_DEU_20260928_2026_cal2026_R0_0.1.csv"
 
 """
 

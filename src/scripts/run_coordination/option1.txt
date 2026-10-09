@@ -1,3 +1,0 @@
-# Example mapping only: adapt column names to your exported profiles.
-option1:
-SOURCE_COLUMNS = {'ch_avail': 'ch_avail_refuel_cp', 'soc_max': 'soc_max', 'soc_min': 'soc_min', 'charging': 'ch_refuel_cp', 'consumption': 'consumption', 'dem_temp': 'dem_temp'}

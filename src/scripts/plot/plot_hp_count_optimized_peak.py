@@ -11,31 +11,12 @@ both.  It reads ``greedy_all_options_summary.csv`` files directly and creates:
 
 Example (Windows cmd.exe):
 
-    python ecv2g\user_dirs\jcheng\scripts\plot_hp_count_optimized_peak.py ^
-      --input-dir "data\data_20260907_1\scenario_participation_results" ^
-      --output-dir data\data_20260907_1\scenario_participation_results\hp_count_analysis ^
-      --option 2 ^
-      --participation-rate 1.0 ^
-      --ev-counts 40,50,60,70,73
-
-        python ecv2g\user_dirs\jcheng\scripts\plot_participation_hp_heatmap.py ^
-      --input-dir "data\data_20260910_1\scenarios" ^
-      --output-dir "data\data_20260910_1\scenarios\participation_hp_heatmap"^
-      --ev-count 607
-
-    python ecv2g\user_dirs\jcheng\scripts\plot_hp_count_optimized_peak.py ^
-        --input-dir "data\data_20260910_1\scenarios" ^
-        --output-dir data\data_20260910_1\scenarios\hp_count_analysis ^
+    python src\scripts\plot\plot_hp_count_optimized_peak.py ^
+        --input-dir "data\data_20260928_1\scenarios" ^
+        --output-dir data\data_20260928_1\scenarios\hp_count_analysis ^
         --option 2 ^
         --participation-rate 1.0 ^
-        --ev-counts 300, 400, 500, 600
-    
-    python ecv2g\user_dirs\jcheng\scripts\plot_hp_count_optimized_peak.py ^
-            --input-dir "data\data_20260928_1\scenarios" ^
-            --output-dir data\data_20260928_1\scenarios\hp_count_analysis ^
-            --option 2 ^
-            --participation-rate 1.0 ^
-            --ev-counts 50, 60, 70, 80, 90
+        --ev-counts 50, 60, 70, 80, 90
 """
 
 from __future__ import annotations
@@ -56,7 +37,7 @@ SUMMARY_NAME = "greedy_all_options_summary.csv"
 
 # Actual heat-pump-household counts for the Kassel hh_factor=1 scenarios.
 # Override this on the command line if another grid/scenario is analysed.
-"""
+
 DEFAULT_HP_COUNT_MAP = {
     0.0: 0,
     0.1: 8,
@@ -70,20 +51,7 @@ DEFAULT_HP_COUNT_MAP = {
     0.9: 51,
     1.0: 56,
 }
-"""
-DEFAULT_HP_COUNT_MAP = {
-    0.0: 0,
-    0.1: 1,
-    0.2: 2,
-    0.3: 3,
-    0.4: 4,
-    0.5: 5,
-    0.6: 6,
-    0.7: 7,
-    0.8: 8,
-    0.9: 10,
-    1.0: 12,
-}
+
 
 SCENARIO_RE = re.compile(
     r"hh_(?P<hh>\d+(?:p\d+)?)__hp_(?P<hp>\d+(?:p\d+)?)__ev_[^/]+"

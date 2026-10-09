@@ -1,9 +1,9 @@
 r"""Collect V2G optimizer summaries from a local data directory.
 
 Usage (Windows or Linux):
-  python collect_v2g_scenarios.py --ev-count 73
-  python ecv2g\user_dirs\jcheng\scripts\collect_v2g_scenarios.py --base-dir data/data_20260928 --scenarios-dir data/data_20260928_1/scenarios --scan-dir data/data_20260928_2 --output data/data_20260928/results.csv --ev-count 97
-  python collect_v2g_scenarios.py --base-dir data/data_20260928 --scenarios-dir data/data_20260928_1/scenarios --scan-dir data/data_20260928_2 --ev-count 73 --output results.csv
+  python ecv2g\user_dirs\jcheng\scripts\analysis\collect_v2g_scenarios.py --ev-count 73
+  python ecv2g\user_dirs\jcheng\scripts\analysis\collect_v2g_scenarios.py --base-dir data/data_20260928 --scenarios-dir data/data_20260928_1/scenarios --scan-dir data/data_20260928_2 --output data/data_20260928/results.csv --ev-count 97
+  python ecv2g\user_dirs\jcheng\scripts\analysis\collect_v2g_scenarios.py --base-dir data/data_20260928 --scenarios-dir data/data_20260928_1/scenarios --scan-dir data/data_20260928_2 --ev-count 73 --output results.csv
 
 Relative folder arguments are resolved from the current working directory.
 With no folder arguments, the script searches current and parent directories

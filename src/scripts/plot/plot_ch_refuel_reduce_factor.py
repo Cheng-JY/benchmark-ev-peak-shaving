@@ -6,7 +6,7 @@ uncontrolled feeder peak.  A conceptual no-flexibility reference point is
 added at retention factor 0 with a value of 100%.
 
 Example (Windows cmd.exe):
-    python ecv2g\user_dirs\jcheng\scripts\plot_ch_refuel_reduce_factor.py ^
+    python src\scripts\plot_ch_refuel_reduce_factor.py ^
       --input-csv "data\data_20260923_2\greedy_collected_results\greedy_results_tidy.csv" ^
       --output-dir "data\data_20260923_2\plots" ^
       --ch-refuel 0.4
@@ -23,22 +23,14 @@ import pandas as pd
 
 
 DEFAULT_CH_REFUEL = 0.9
-# TARGET_SOC_MIN_COLUMNS = {
-#     "soc_min_lim_refuel_cp": "Behavioral plugging with fixed charging window",
-#     "soc_min_lim_refuel_targetsoc_cp": (
-#         "Behavioral plugging with fixed plugging window"
-#     ),
-# }
 
 TARGET_SOC_MIN_COLUMNS = {
     "soc_min_refuel_cp": "Arrival-SoC-triggered plugging with flexible plugging window",
-
 }
 
 COLORS = {"flat": "#0072B2", "peak": "#D55E00"}
 MARKERS = {"flat": "o", "peak": "s"}
 LABELS = {"flat": "Uniform reduction", "peak": "Peak-weighted reduction"}
-# UNREDUCED_AVAILABILITY_COLUMN = "ch_avail_refuel_targetsoc_cp"
 UNREDUCED_AVAILABILITY_COLUMN = "ch_avail_refuel_cp"
 
 def read_results(path: Path) -> pd.DataFrame:
@@ -253,15 +245,6 @@ def plot_one(
     axis.set_axisbelow(True)
     axis.legend(loc="lower right", frameon=True)
 
-    # fig.text(
-    #     0.5,
-    #     0.012,
-    #     "Factor 0 and failed/infeasible runs are 100%; factor 1 uses the unreduced target-SoC availability.",
-    #     ha="center",
-    #     va="bottom",
-    #     fontsize=8.5,
-    #     color="#555555",
-    # )
     fig.tight_layout(rect=(0, 0.045, 1, 1))
 
     output_stem.parent.mkdir(parents=True, exist_ok=True)

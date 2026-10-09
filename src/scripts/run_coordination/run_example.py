@@ -9,17 +9,12 @@ Each option is run independently and written to ``greedy_results_N`` with:
 * ``greedy_peak_shaving_summary.csv``
 * ``source_columns.csv``
 
-python ecv2g\user_dirs\jcheng\scripts\run_example.py --ev-csv "data\data_20260902\ch_profiles_agg_home_DEU_20260902_2026_cal2026_R0_0.1.csv" --heat-pump-csv "data\data_20260902\heat_pump_profiles.csv" --household-csv "data\data_20260902\household_load.csv" --options-file "data\data_20260902\option1.txt" --output-root "data\data_20260902\greedy_results_0.1"
-
-    python ecv2g\user_dirs\jcheng\scripts\run_example.py ^
-        --ev-csv "data\data_20260922_2\ch_profiles_agg_home_DEU_20260922_2026_cal2026_R0_0.8.csv" ^
-        --heat-pump-csv "data\data_20260922_2\heat_pump_profiles.csv" ^
-        --household-csv "data\data_20260922_2\household_load.csv" ^
-        --options-file "data\data_20260922_2\option1.txt" ^
-        --output-root "data\data_20260922_2\greedy_results_0.8"
-
-python ecv2g\user_dirs\jcheng\scripts\run_example_1.py --ev-csv "data\data_20260827\ch_profiles_agg_home_DEU_20260827_2008_cal2008_R0.csv" --heat-pump-csv "data\profile_scenarios\hh_1p2__hp_0p2__ev_1__Kassel_2026__seed_13\heat_pump\heat_pump_profiles.csv" --household-csv "data\profile_scenarios\hh_1p2__hp_0p2__ev_1__Kassel_2026__seed_13\household\household_load.csv" --options-file "data\data_20260827\option1.txt" --output-root "data\data_20260827\greedy_results_2008"
-
+python src\scripts\run_example.py ^
+    --ev-csv "data\data_20260922_2\ch_profiles_agg_home_DEU_20260922_2026_cal2026_R0_0.8.csv" ^
+    --heat-pump-csv "data\data_20260922_2\heat_pump_profiles.csv" ^
+    --household-csv "data\data_20260922_2\household_load.csv" ^
+    --options-file "data\data_20260922_2\option1.txt" ^
+    --output-root "data\data_20260922_2\greedy_results_0.8"
 
 A combined ``greedy_all_options_summary.csv`` is written to the output root.
 All optimizer calculations use MWh per one-hour step; power outputs are MW.
@@ -43,10 +38,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from jcheng.components.optimizer.greedy_optimizer import (
+from src.components.optimizer.greedy_optimizer import (
     GreedyEVOptimizer,
 )
-from jcheng.components.optimizer.optimization_config import (  # noqa: E402
+from src.components.optimizer.optimization_config import (  # noqa: E402
     OptimizationConfig,
 )
 
